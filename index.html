@@ -651,6 +651,31 @@
     color:var(--red);
   }
 
+  /* Rich event cards (panels with speakers + topics) */
+  .event-card.wide{grid-column:span 2;}
+  @media (max-width:760px){ .event-card.wide{grid-column:auto;} }
+  .ecard-sub{font-size:13.5px; font-style:italic; color:var(--red); font-weight:600; margin:0 0 6px; line-height:1.35;}
+  .ecard-label{
+    font-family:var(--font-mono); font-size:10.5px; letter-spacing:.07em; text-transform:uppercase;
+    color:var(--slate); font-weight:700; margin:14px 0 8px;
+  }
+  .panelist-list{
+    list-style:none; margin:0 0 4px; padding:0;
+    display:grid; grid-template-columns:repeat(auto-fit, minmax(240px,1fr)); gap:8px 18px;
+  }
+  .panelist-list li{
+    padding:8px 0 8px 12px; border-left:3px solid var(--red); line-height:1.35;
+  }
+  .panelist-list .p-name{display:block; font-weight:700; font-size:13.5px; color:var(--charcoal);}
+  .panelist-list .p-role{display:block; font-size:12px; color:var(--slate); margin-top:2px;}
+  .topic-chips{display:flex; flex-wrap:wrap; gap:7px; margin:0 0 14px; padding:0; list-style:none;}
+  .topic-chips li{
+    font-size:11.5px; font-weight:600; color:var(--red); background:#FBEAEA;
+    border:1px solid #EFC9C9; border-radius:14px; padding:4px 10px;
+  }
+  footer.hub-footer a{color:var(--slate); text-decoration:underline; text-underline-offset:2px;}
+  footer.hub-footer a:hover{color:var(--red);}
+
   ::-webkit-scrollbar{width:10px; height:10px;}
   ::-webkit-scrollbar-thumb{background:#D8D2C3; border-radius:6px;}
   ::-webkit-scrollbar-track{background:transparent;}
@@ -824,6 +849,7 @@
 
       <footer class="hub-footer">
         <span><b>Cornell</b> Tech MBA | <b>Big Red Tech Club</b></span>
+        <span><a href="https://hr.cornell.edu/about/workplace-rights/equal-education-and-employment" target="_blank" rel="noopener">Equal Education and Employment Opportunity (EEEO) Statement</a></span>
       </footer>
     </div>
   </div>
@@ -914,7 +940,7 @@
       desc:"Alumni talk on building meaningful professional relationships and approaching networking with confidence. Part one of the BRTC Careers networking series.",
     },
     {
-      id:'e10', status:'upcoming', type:'BRTC Networking Series',
+      id:'e14', status:'upcoming', type:'BRTC Networking Series',
       title:'BRTC Alumni Networking Evening',
       company:'', speaker:'', role:'',
       date:'Wed, Oct 7', time:'6:00–8:00 PM', location:'Tata 131, Cornell Tech', rsvps:0,
@@ -922,12 +948,29 @@
       desc:'An evening with Cornell alumni: insights on networking, navigating the job search, and negotiating, plus their career journeys and lessons learned. Registration is open and spots are limited.',
     },
     {
+      id:'e10', status:'upcoming', type:'BRTC Networking Series',
+      title:'Alumni Networking & Speed Dating',
+      company:'', speaker:'', role:'',
+      date:'Wed, Oct 7', time:'Time TBD', location:'TBD', rsvps:0,
+      desc:'Practice your networking skills through structured, rotating conversations with alumni across industries. Part two of the BRTC Careers networking series.',
+    },
+    {
       id:'e13', status:'upcoming', type:'Panel',
-      title:'Urban Tech Panel — Cities in Motion: Technology, Strategy & Public Impact',
-      company:'', speaker:'Henry Grunzweig, Noelle Francois, Jeff Schlegelmilch, Rowan Wu & Rafay Khan', role:'',
-      date:'Thu, Oct 22', time:'6:30–8:30 PM', location:'Tata 141, Cornell Tech, New York City', rsvps:0,
+      title:'Urban Tech Panel',
+      subtitle:'Cities in Motion: Technology, Strategy & Public Impact',
+      company:'', speaker:'', role:'',
+      date:'Thu, Oct 22', time:'6:30–8:30 PM', location:'Tata 141, Cornell Tech', rsvps:0,
+      format:'Panel + Q&A + Networking',
       formUrl:'https://qrto.org/r5gwJl',
-      desc:'Five leaders across economic development, housing, transportation, climate resilience, and public-sector technology on how urban innovation moves from ideas into real implementation. Panel + Q&A + networking. Panelists: Henry Grunzweig (AVP Strategy, NYC EDC); Noelle Francois (Urban Innovation Fellow, Cornell Tech × NYCHA); Jeff Schlegelmilch (Faculty Director, National Center for Disaster Preparedness, Columbia Climate School); Rowan Wu (Manager, Strategic Initiatives, Metropolitan Transportation Authority); Rafay Khan (Office of the New York State Attorney General · Cornell Tech M.S. in Information Systems). Topics: public-sector innovation, procurement & implementation, housing, transit & resilience, data, technology & public trust, and careers in urban tech.',
+      desc:'Join five leaders working across economic development, housing, transportation, climate resilience, and public-sector technology for a conversation on how urban innovation moves from ideas into real implementation.',
+      panelists:[
+        {name:'Henry Grunzweig', role:'AVP Strategy, NYC EDC'},
+        {name:'Noelle Francois', role:'Urban Innovation Fellow, Cornell Tech × NYCHA'},
+        {name:'Jeff Schlegelmilch', role:'Faculty Director, National Center for Disaster Preparedness, Columbia Climate School'},
+        {name:'Rowan Wu', role:'Manager, Strategic Initiatives, Metropolitan Transportation Authority'},
+        {name:'Rafay Khan', role:'Office of the New York State Attorney General · Cornell Tech M.S. in Information Systems'},
+      ],
+      topics:['Public-sector innovation','Procurement & implementation','Housing, transit & resilience','Data, technology & public trust','Careers in urban tech'],
     },
     {
       id:'e11', status:'upcoming', type:'Trek',
@@ -1183,24 +1226,40 @@
     bindReveals(document.getElementById('homeUpcoming'));
   }
 
+  function richExtrasHTML(e){
+    let h = '';
+    if(e.panelists && e.panelists.length){
+      h += `<div class="ecard-label">Panelists</div><ul class="panelist-list">` +
+        e.panelists.map(p=>`<li><span class="p-name">${p.name}</span><span class="p-role">${p.role}</span></li>`).join('') + `</ul>`;
+    }
+    if(e.topics && e.topics.length){
+      h += `<div class="ecard-label">What we’ll discuss</div><ul class="topic-chips">` +
+        e.topics.map(t=>`<li>${t}</li>`).join('') + `</ul>`;
+    }
+    return h;
+  }
+
   /* ================= EVENT CARD ================= */
   function eventCardHTML(e, i){
     const delay = `style="transition-delay:${Math.min((i||0)*70,280)}ms;"`;
     if(e.status==='upcoming'){
       const going = e._going;
       return `
-      <div class="event-card reveal-up" ${delay}>
+      <div class="event-card ${e.panelists?'wide ':''}reveal-up" ${delay}>
         <div class="tag-strip"></div>
         <div class="ecard-body">
           <div class="ecard-type">${e.type}</div>
           <div class="ecard-title">${e.title}</div>
+          ${e.subtitle ? `<div class="ecard-sub">${e.subtitle}</div>` : ''}
           <div class="ecard-meta">
             ${e.speaker ? `<div>🎙️ ${e.speaker}${e.role? ' · '+e.role:''}</div>` : ''}
             <div>📅 <span class="dt-badge">${e.date}</span>${e.time? ` <span class="dt-badge time">${e.time}</span>`:''}</div>
             ${e.location ? `<div>📍 ${e.location}</div>` : ''}
+            ${e.format ? `<div>🎟️ ${e.format}</div>` : ''}
             ${e.speakerLink ? `<div>🔗 <a href="${e.speakerLink}" target="_blank" rel="noopener" style="color:var(--slate);">Speaker LinkedIn ↗</a></div>` : ''}
           </div>
           ${e.desc ? `<div class="ecard-desc">${e.desc}</div>` : ''}
+          ${richExtrasHTML(e)}
           <div class="ecard-foot" style="justify-content:flex-end;">
             ${e.formUrl
               ? `<a class="btn" href="${e.formUrl}" target="_blank" rel="noopener">Sign up ↗</a>`
@@ -1212,17 +1271,20 @@
       const open = e._open;
       const hasRecap = !!e.hasRecap;
       return `
-      <div class="event-card past reveal-up" ${delay}>
+      <div class="event-card past ${e.panelists?'wide ':''}reveal-up" ${delay}>
         <div class="tag-strip"></div>
         <div class="ecard-body">
           <div class="ecard-type">${e.type} · Past</div>
           <div class="ecard-title">${e.title}</div>
+          ${e.subtitle ? `<div class="ecard-sub">${e.subtitle}</div>` : ''}
           <div class="ecard-meta">
             ${e.speaker ? `<div>🎙️ ${e.speaker}${e.role? ' · '+e.role:''}</div>` : ''}
             <div>📅 <span class="dt-badge">${e.date}</span>${e.time? ` <span class="dt-badge time">${e.time}</span>`:''}</div>
             ${e.location ? `<div>📍 ${e.location}</div>` : ''}
+            ${e.format ? `<div>🎟️ ${e.format}</div>` : ''}
           </div>
           ${e.desc ? `<div class="ecard-desc">${e.desc}</div>` : ''}
+          ${richExtrasHTML(e)}
           ${(open && hasRecap) ? `
             <div style="margin-bottom:12px;">
               <div style="font-family:var(--font-mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--slate); margin-bottom:6px;">Key Takeaways</div>
