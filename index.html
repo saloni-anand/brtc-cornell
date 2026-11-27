@@ -797,6 +797,11 @@
           </thead>
           <tbody id="leaderboardBody"></tbody>
         </table>
+        <div id="leaderboardFallback" hidden>
+          <iframe title="Live points leaderboard from Google Sheets"
+                  style="display:block;width:100%;height:60vh;border:0;background:white"></iframe>
+          <p><a target="_blank" rel="noopener">Open the live leaderboard in Google Sheets</a></p>
+        </div>
       </section>
 
       <!-- ============ CAREER ============ -->
@@ -855,6 +860,7 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.5.3/papaparse.min.js"></script>
 <script>
 (function(){
 
@@ -1039,97 +1045,7 @@
 
   /* Points: General Body Meeting = 10 pts, Roku speaker session (Employer/Company Event) = 20 pts.
      BRTC Exec Board members are counted as attending events they hosted. */
-  const leaderboard = [
-    {name:'Ali Abdullah', points:0, events:0},
-    {name:'Shahad Ababtain', points:0, events:0},
-    {name:'Arjun Abrol', points:10, events:1},
-    {name:'Palak Agrawal', points:10, events:1},
-    {name:'Shubhangi Agrawal', points:20, events:1},
-    {name:'Aiswariya Suresh', points:30, events:2},
-    {name:'Astawa Alam', points:30, events:2},
-    {name:'Abdulrahman Alghanmi', points:0, events:0},
-    {name:'Saloni Anand', points:30, events:2},
-    {name:'Muhammad Mujtaba Asghar', points:30, events:2},
-    {name:'Zahra Ayub Syed', points:10, events:1},
-    {name:'Urbee Bandyopadhyay', points:30, events:2},
-    {name:'Vani Batra', points:20, events:1},
-    {name:'Arpita Bhardwaj', points:0, events:0},
-    {name:'Robert Bonovich', points:0, events:0},
-    {name:'Prasenjeet Chakraborty', points:30, events:2},
-    {name:'Harsimran Chauhan', points:30, events:2},
-    {name:'Lu-Yi Chen (Frances)', points:10, events:1},
-    {name:'Infither Chowdhury', points:30, events:2},
-    {name:'Joshua Christian', points:30, events:2},
-    {name:'Alex Chuang', points:30, events:2},
-    {name:'Nicole Czemerinski', points:0, events:0},
-    {name:'Manish Das Mohapatra', points:0, events:0},
-    {name:'Noah Dixon', points:10, events:1},
-    {name:'Robert Dornbush', points:10, events:1},
-    {name:'Divya Gattani', points:20, events:1},
-    {name:'Linda Giang', points:0, events:0},
-    {name:'Alvaro Gomez de la Torre de las Casas', points:30, events:2},
-    {name:"Ma'ayan Gorlin", points:10, events:1},
-    {name:'Katie Graves', points:30, events:2},
-    {name:'Yoav Haviv', points:10, events:1},
-    {name:'Ruchelli Hawks', points:0, events:0},
-    {name:'Kena Hiromoto', points:30, events:2},
-    {name:'Haydn Hsin', points:0, events:0},
-    {name:'Ariana Huang', points:30, events:2},
-    {name:'Emily Inzero', points:30, events:2},
-    {name:'Unser Jaffry', points:10, events:1},
-    {name:'Taekoo Kang', points:30, events:2},
-    {name:'Tika Diagnestya', points:20, events:1},
-    {name:'Olasoji Agboola', points:0, events:0},
-    {name:'Mirza Azam Baig', points:0, events:0},
-    {name:'Peter Martin Berzins', points:0, events:0},
-    {name:'Ying Hsuan Chen', points:0, events:0},
-    {name:'Jack Ferguson', points:0, events:0},
-    {name:'Yueming Gao', points:10, events:1},
-    {name:'Sean Kim', points:0, events:0},
-    {name:'Ryan Xin Lin', points:0, events:0},
-    {name:'Pablo Penalba', points:0, events:0},
-    {name:'Yifan Ping', points:0, events:0},
-    {name:'Arkin Rao', points:0, events:0},
-    {name:'Tenzin Sherap', points:0, events:0},
-    {name:'Borzooieh Tabib', points:0, events:0},
-    {name:'Chih-Hsuan Wang', points:0, events:0},
-    {name:'Wally Khan', points:10, events:1},
-    {name:'Luiza Kok de Assis Couto', points:0, events:0},
-    {name:'Sahaja Kovuri', points:30, events:2},
-    {name:'Varun Kulkarni', points:0, events:0},
-    {name:'Prashant Kumar', points:20, events:1},
-    {name:'Gen Li', points:0, events:0},
-    {name:'Almir Lima Caggy', points:0, events:0},
-    {name:'Ssu yu Liu (Tatiana)', points:20, events:1},
-    {name:'Nicolo Lugano', points:0, events:0},
-    {name:'Kingsley Madikaegbu', points:0, events:0},
-    {name:'Matthew McCammon', points:10, events:1},
-    {name:'Taarini Mohan', points:30, events:2},
-    {name:'Quyen Nguyen', points:20, events:1},
-    {name:'Netochukwu Nwogbo (Neto)', points:10, events:1},
-    {name:'Ayomide Oribamise', points:10, events:1},
-    {name:'Isoken Osagie', points:30, events:2},
-    {name:'Manuela Ospina', points:0, events:0},
-    {name:'Marco Ospina', points:0, events:0},
-    {name:'Abhishek Dhruvan Pabbineedi', points:10, events:1},
-    {name:'Wenisah Panjaitan', points:0, events:0},
-    {name:'Khanjan Patel', points:10, events:1},
-    {name:'Shantanu Prakash', points:20, events:1},
-    {name:'Sharmini Rathakrishnan', points:10, events:1},
-    {name:'Adarsh Ravindra', points:10, events:1},
-    {name:'Zahra Rizwan', points:30, events:2},
-    {name:'Ludovica Saccavini', points:10, events:1},
-    {name:'Radhika Sahani', points:30, events:2},
-    {name:'Ronaldi Saphala', points:0, events:0},
-    {name:'Juan Sepulveda', points:0, events:0},
-    {name:'Rajvi Shah', points:10, events:1},
-    {name:'Riya Swayampati', points:30, events:2},
-    {name:'Peichun Tsai (Peggy)', points:20, events:1},
-    {name:'Brice Tucker', points:10, events:1},
-    {name:'Gladiz Velez', points:10, events:1},
-    {name:'Bhawana Wadhwani', points:0, events:0},
-    {name:'Brian Williams', points:0, events:0},
-  ];
+  const leaderboardCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRA0Chd2wNGGav1ZU-uwiG7MdrCwcFed1LgFw-xQfvkW0bvhllWsBEoERWLARe70dGLCOTkab4y905i/pub?gid=133141256&single=true&output=csv';
 
   const career = [];
 
@@ -1431,7 +1347,53 @@
   }
 
   /* ================= LEADERBOARD ================= */
-  function renderLeaderboard(){
+  async function loadLeaderboard(){
+    const body = document.getElementById('leaderboardBody');
+    body.innerHTML = '<tr><td colspan="4">Loading leaderboard…</td></tr>';
+
+    try {
+      const response = await fetch(leaderboardCsvUrl);
+      if(!response.ok) throw new Error('CSV request failed: ' + response.status);
+
+      const { data, errors, meta } = Papa.parse(await response.text(), {
+        header: true,
+        skipEmptyLines: 'greedy',
+        transformHeader: header => header.trim()
+      });
+      const expected = ['Display Name', 'Points', 'Events Attended'];
+      if(errors.length || !expected.every(field => meta.fields?.includes(field))){
+        throw new Error('The published leaderboard CSV has unexpected headers or rows.');
+      }
+
+      const leaderboard = data
+        .filter(row => row['Display Name']?.trim())
+        .map(row => ({
+          name: row['Display Name'].trim(),
+          points: Number(row.Points),
+          events: Number(row['Events Attended'])
+        }));
+      if(leaderboard.some(row => !Number.isFinite(row.points) || !Number.isFinite(row.events))){
+        throw new Error('Points and Events Attended must be numbers.');
+      }
+
+      renderLeaderboard(leaderboard);
+    } catch(error) {
+      console.warn('The custom leaderboard could not load. Showing the published sheet:', error);
+      const publishedSheet = new URL(leaderboardCsvUrl);
+      publishedSheet.pathname = publishedSheet.pathname.replace(/\/pub$/, '/pubhtml');
+      publishedSheet.searchParams.delete('output');
+      publishedSheet.searchParams.set('widget', 'true');
+      publishedSheet.searchParams.set('headers', 'false');
+
+      const fallback = document.getElementById('leaderboardFallback');
+      fallback.querySelector('iframe').src = publishedSheet.href;
+      fallback.querySelector('a').href = publishedSheet.href;
+      body.closest('table').hidden = true;
+      fallback.hidden = false;
+    }
+  }
+
+  function renderLeaderboard(leaderboard){
     if(leaderboard.length === 0){
       document.getElementById('leaderboardBody').innerHTML = `<tr><td colspan="4">${emptyState('No points logged yet.')}</td></tr>`;
       return;
@@ -1441,11 +1403,14 @@
     document.getElementById('leaderboardBody').innerHTML = sorted.map((p,i)=>`
       <tr class="reveal-up" style="transition-delay:${Math.min(i*18,360)}ms;">
         <td style="font-family:var(--font-mono);color:var(--slate);">${i+1}</td>
-        <td><span class="speaker-name">${p.name}</span></td>
+        <td><span class="speaker-name"></span></td>
         <td style="font-family:var(--font-mono);color:var(--red);font-weight:700;">${p.points}</td>
         <td style="font-family:var(--font-mono);font-size:12px;">${p.events}</td>
       </tr>
     `).join('');
+    document.querySelectorAll('#leaderboardBody .speaker-name').forEach((cell, i) => {
+      cell.textContent = sorted[i].name;
+    });
     bindReveals(document.getElementById('leaderboardBody'));
   }
 
@@ -1577,7 +1542,7 @@
   renderEvents();
   renderNewsletter();
   renderSpeakers();
-  renderLeaderboard();
+  loadLeaderboard();
   renderCareer();
   renderResources();
   renderPolls();
