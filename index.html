@@ -314,6 +314,8 @@
   @keyframes growBar{ from{width:0;} to{width:68px;} }
   .page-sub{color:var(--slate); font-size:14.5px; max-width:640px; line-height:1.5;}
 
+  .event-description{white-space:pre-line;}
+
   /* Points legend (Leaderboard page) */
   .points-legend{display:flex; flex-wrap:wrap; gap:10px; margin-top:16px;}
   .points-chip{
@@ -602,10 +604,10 @@
   .res-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:14px;}
   .res-card{background:var(--paper); border:1px solid var(--line); border-radius:var(--radius); padding:16px; box-shadow:var(--shadow); transition:transform 0.25s cubic-bezier(.16,.8,.24,1), box-shadow 0.25s ease;}
   .res-card:hover{transform:translateY(-4px); box-shadow:0 12px 26px rgba(34,30,28,0.12);}
-  .res-card h4{margin:0 0 10px; font-family:var(--font-display); font-size:15px; display:flex; gap:8px; align-items:center;}
-  .res-card ul{margin:0; padding-left:0; list-style:none; font-size:13px; line-height:2; color:#4a4340;}
-  .res-card ul li a{text-decoration:none; color:inherit; border-bottom:1px dotted var(--slate-light);}
-  .res-card ul li a:hover{color:var(--red); border-color:var(--red);}
+  .res-card h4{margin:8px 0 0; font-family:var(--font-display); font-size:15px;}
+  .res-card a{text-decoration:none; color:inherit; border-bottom:1px dotted var(--slate-light);}
+  .res-card a:hover{color:var(--red); border-color:var(--red);}
+  .res-description{margin:6px 0 0; color:var(--slate); font-size:13px; line-height:1.5; white-space:pre-line;}
 
   /* Polls */
   .poll-card{background:var(--paper); border:1px solid var(--line); border-radius:var(--radius); padding:20px; margin-bottom:18px; box-shadow:var(--shadow); transition:box-shadow 0.25s ease;}
@@ -742,10 +744,11 @@
         <div class="page-head">
           <div class="page-eyebrow">Events</div>
           <h1 class="page-title">Events</h1>
-          <p class="page-sub">RSVP to what's coming up, or revisit recordings and takeaways from past sessions.</p>
+          <p class="page-sub">Find upcoming events, see what’s planned, or revisit past events.</p>
         </div>
         <div class="toggle-row">
           <button class="toggle-btn active" data-evfilter="upcoming">Upcoming</button>
+          <button class="toggle-btn" data-evfilter="planned">Planned</button>
           <button class="toggle-btn" data-evfilter="past">Past Events</button>
         </div>
         <div class="card-grid" id="eventsGrid"></div>
@@ -864,135 +867,8 @@
 <script>
 (function(){
 
-  /* ================= DATA =================
-     Empty on purpose. No confirmed events, speakers, newsletters, career
-     postings, poll results, or attendance numbers exist yet — this hub
-     ships with real structure and no invented content. Add real items
-     to these arrays as the club confirms them. */
-  const events = [
-    {
-      id:'e1', status:'past', type:'Speaker Session',
-      title:'Big Red Tech × Roku: Insights from a PM Leader',
-      company:'Roku', speaker:'Renée Mok', role:'Senior Product Manager, Roku',
-      date:'Thu, Sept 3',
-      desc:"An exclusive speaker session with the Cornell MBA cohort — Renée's PM journey, life as a PM at Roku, key learnings, and advice for aspiring PMs, followed by an open Q&A.",
-      hasRecording:false, hasSlides:false, hasRecap:false,
-    },
-    {
-      id:'e2', status:'past', type:'General Body Meeting',
-      title:'General Body Meeting — Fall 2026 Kickoff',
-      company:'', speaker:'', role:'',
-      date:'Tue, Sept 8', time:'3:00–4:00 PM', location:'Tata 131',
-      desc:"The first BRTC General Body Meeting of the year. Covered BRTC's vision and strategic priorities, career programming, upcoming treks, leadership opportunities, and communication channels.",
-      takeaways:[
-        'BRTC vision & 3 core goals for Fall 2026: proximity, brand equity, resourced impact.',
-        'Careers team plans a two-part networking series plus alumni access and company exposure.',
-        'Fall NYC Tech Trek (Oct 23) and Winter West Coast Trek (Jan 11–15) previewed.',
-        'Leadership & AVP applications open, due Sept 15; announcements Sept 21.',
-        'Comms channels going forward: CampusGroups/Calendar for official events, WhatsApp for quick updates, this Hub and the newsletter for the full digest.',
-      ],
-      hasRecording:false, hasSlides:true, hasRecap:true,
-    },
-    {
-      id:'e3', status:'past', type:'CMC Event',
-      title:'EY Foundry Info Session',
-      company:'EY', speaker:'', role:'',
-      date:'Thu, Sept 10', time:'5:15–6:10 PM', location:'BLM 161',
-      desc:'Cornell Tech Career Management-run info session on the EY Foundry program.',
-      hasRecording:false, hasSlides:false, hasRecap:false,
-    },
-    {
-      id:'e4', status:'past', type:'CMC Event',
-      title:'Leading Through Change',
-      company:'Visa', speaker:'Kelly Mahon Tullier', role:'Vice Chair, Visa',
-      date:'Thu, Sept 10', time:'6:30–7:30 PM', location:'Bloomberg 061',
-      desc:'A conversation with Kelly Mahon Tullier, Vice Chair at Visa, on building a career that thrives in today\u2019s world. CMC event with BRTC support.',
-      hasRecording:false, hasSlides:false, hasRecap:false,
-    },
-    {
-      id:'e5', status:'past', type:'CMC Event',
-      title:'Microsoft Info Session',
-      company:'Microsoft', speaker:'', role:'',
-      date:'Thu, Sept 10', time:'7:30–9:00 PM', location:'BLM 161',
-      desc:'Corporate briefing / info session with Microsoft.',
-      hasRecording:false, hasSlides:false, hasRecap:false,
-    },
-    {
-      id:'e6', status:'past', type:'Career Workshop',
-      title:'Career Value Storytelling Workshop',
-      company:'', speaker:'Amy Cheney', role:'',
-      date:'Mon, Sept 14', time:'12:00–2:00 PM', location:'TBD', rsvps:0,
-      desc:'Interactive storytelling workshop led by Amy Cheney, focused on building your career value narrative.',
-    },
-    {
-      id:'e7', status:'past', type:'Employer Event',
-      title:'Amazon Corporate Briefing',
-      company:'Amazon', speaker:'', role:'',
-      date:'Tue, Sept 15', time:'4:00–5:00 PM', location:'Bloomberg 061', rsvps:0,
-      desc:'Corporate briefing and info session — learn more about Amazon and connect with company representatives.',
-    },
-    {
-      id:'e8', status:'past', type:'BRTC / Cohort Trip',
-      title:'Ithaca Weekend',
-      company:'', speaker:'', role:'',
-      date:'Sept 17–20', time:'', location:'Ithaca, NY', rsvps:0,
-      desc:'JCT MBA weekend itinerary: bus to Ithaca, two days of Tech Prep at Sage Hall (incl. an AI case interviews workshop), a Two-Year MBA & Johnson mixer, and cohort social activities.',
-    },
-    {
-      id:'e9', status:'past', type:'BRTC Networking Series',
-      title:'Learn from a Master Networker',
-      company:'', speaker:'Rishabh Surendran', role:'Cornell Tech Alum',
-      date:'Wed, Sept 23', time:'4:30–5:15 PM', location:'B161', rsvps:0,
-      desc:"Alumni talk on building meaningful professional relationships and approaching networking with confidence. Part one of the BRTC Careers networking series.",
-    },
-    {
-      id:'e14', status:'upcoming', type:'BRTC Networking Series',
-      title:'BRTC Alumni Networking Evening',
-      company:'', speaker:'', role:'',
-      date:'Wed, Oct 7', time:'6:00–8:00 PM', location:'Tata 131, Cornell Tech', rsvps:0,
-      formUrl:'https://cglink.me/2hj/r2133008',
-      desc:'An evening with Cornell alumni: insights on networking, navigating the job search, and negotiating, plus their career journeys and lessons learned. Registration is open and spots are limited.',
-    },
-    {
-      id:'e10', status:'upcoming', type:'BRTC Networking Series',
-      title:'Alumni Networking & Speed Dating',
-      company:'', speaker:'', role:'',
-      date:'Wed, Oct 7', time:'Time TBD', location:'TBD', rsvps:0,
-      desc:'Practice your networking skills through structured, rotating conversations with alumni across industries. Part two of the BRTC Careers networking series.',
-    },
-    {
-      id:'e13', status:'upcoming', type:'Panel',
-      title:'Urban Tech Panel',
-      subtitle:'Cities in Motion: Technology, Strategy & Public Impact',
-      company:'', speaker:'', role:'',
-      date:'Thu, Oct 22', time:'6:30–8:30 PM', location:'Tata 141, Cornell Tech', rsvps:0,
-      format:'Panel + Q&A + Networking',
-      formUrl:'https://qrto.org/r5gwJl',
-      desc:'Join five leaders working across economic development, housing, transportation, climate resilience, and public-sector technology for a conversation on how urban innovation moves from ideas into real implementation.',
-      panelists:[
-        {name:'Henry Grunzweig', role:'AVP Strategy, NYC EDC'},
-        {name:'Noelle Francois', role:'Urban Innovation Fellow, Cornell Tech × NYCHA'},
-        {name:'Jeff Schlegelmilch', role:'Faculty Director, National Center for Disaster Preparedness, Columbia Climate School'},
-        {name:'Rowan Wu', role:'Manager, Strategic Initiatives, Metropolitan Transportation Authority'},
-        {name:'Rafay Khan', role:'Office of the New York State Attorney General · Cornell Tech M.S. in Information Systems'},
-      ],
-      topics:['Public-sector innovation','Procurement & implementation','Housing, transit & resilience','Data, technology & public trust','Careers in urban tech'],
-    },
-    {
-      id:'e11', status:'upcoming', type:'Trek',
-      title:'NYC Tech Trek',
-      company:'', speaker:'', role:'',
-      date:'Fri, Oct 23', time:'All day', location:'New York City', rsvps:0,
-      desc:'Signature fall trek — visit up to two companies (target list includes Uber, Samsung, Adobe, Meta, American Express, Microsoft, and Salesforce), meet professionals and alumni, and close with a networking reception. Estimated cost ~$40/student; capacity limited.',
-    },
-    {
-      id:'e12', status:'upcoming', type:'Trek',
-      title:'West Coast Trek',
-      company:'', speaker:'', role:'',
-      date:'Jan 11–15', time:'', location:'Bay Area, CA', rsvps:0,
-      desc:'Spring semester trek engaging leading technology companies, venture capital firms, startups, and alumni in the Bay Area. Applications, travel, and cost details to follow.',
-    },
-  ];
+  const eventsCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vSuUFgXvTkzp87_ZFH4wFNuIOOiNXMhXc_AzQpUw1XmcS45aWFvpFpgaHAwGQv-aCPnYKCFQrYdx2Jb/pub?gid=0&single=true&output=csv';
+  const events = [];
 
   const newsletters = [
     {week:'Week of Sept 8', date:'Sept 9, 2026',
@@ -1049,11 +925,7 @@
 
   const career = [];
 
-  const resources = [
-    {title:'Career', icon:'💼', items:[
-      {label:'Quinncia — AI resume & interview prep', url:'https://quinncia.io'},
-    ]},
-  ];
+  const resourcesCsvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vRHughGhNExyzuqEj47EzCzo7uv8i4ugqAz0ZNMGfIKN90AaYR53_GXQu47q2OYcvluSLt3eNuVJe15/pub?gid=0&single=true&output=csv';
 
   const polls = [];
 
@@ -1111,144 +983,223 @@
   window.addEventListener('scroll', updateScrollProgress, {passive:true});
   window.addEventListener('resize', updateScrollProgress);
 
-  /* ================= RENDER: TICKER ================= */
-  function renderTicker(){
-    const upcoming = events.filter(e=>e.status==='upcoming');
-    if(upcoming.length === 0){
-      document.getElementById('tickerTrack').innerHTML = `<span>No confirmed events yet — add one to see it here.</span>`.repeat(2);
-      return;
-    }
-    const parts = upcoming.map(e=>`<span><b>${e.date}</b>${e.time? ` <span class="t-time">· ${e.time}</span>`:''} — ${e.title}</span>`).join('');
-    document.getElementById('tickerTrack').innerHTML = parts + parts; // doubled for seamless loop
+  const easternClock = new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'America/New_York', year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23'
+  });
+  const eventDayLabel = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'UTC', weekday: 'short', month: 'short', day: 'numeric', year: 'numeric'
+  });
+  const eventTimeLabel = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'UTC', hour: 'numeric', minute: '2-digit'
+  });
+  const dayMs = 86400000;
+  let eventLoadMessage = 'Loading events…';
+  let thisWeek = [];
+
+  // Represent Eastern calendar dates and times on a UTC scale for wall-clock comparisons.
+  function easternNow(){
+    const parts = Object.fromEntries(easternClock.formatToParts(new Date()).map(part => [part.type, part.value]));
+    return Date.UTC(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute, parts.second);
   }
 
-  /* ================= RENDER: HOME ================= */
+  function parseEventDay(value){
+    const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+    const us = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(value);
+    if(!iso && !us) return NaN;
+    const [year, month, day] = (iso ? iso.slice(1) : [us[3], us[1], us[2]]).map(Number);
+    const date = new Date(Date.UTC(year, month - 1, day));
+    return date.getUTCFullYear() === year && date.getUTCMonth() === month - 1 &&
+      date.getUTCDate() === day ? date.getTime() : NaN;
+  }
+
+  function parseEventTime(value){
+    const match = /^(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?$/i.exec(value);
+    if(!match) return NaN;
+    const [, hour, minute, second = '0', period] = match;
+    if(+minute > 59 || +second > 59 || (period ? +hour < 1 || +hour > 12 : +hour > 23)) return NaN;
+    const hours = period ? +hour % 12 + (period.toUpperCase() === 'PM' ? 12 : 0) : +hour;
+    return ((hours * 60 + +minute) * 60 + +second) * 1000;
+  }
+
+  function escapeHtml(value){
+    return value.replace(/[&<>"']/g, char => ({
+      '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;'
+    })[char]);
+  }
+
+  function safeHttpLink(value){
+    try {
+      const url = new URL(value);
+      if(url.protocol === 'https:' || url.protocol === 'http:') return escapeHtml(url.href);
+    } catch {}
+    return '';
+  }
+
+  function readEvent(row){
+    const value = field => (row[field] || '').trim();
+    const id = value('Event ID');
+    const title = value('Event Name');
+    const status = value('Status').toLowerCase();
+    if(!id || !title || !['confirmed', 'planned'].includes(status)) return null;
+
+    const startText = value('Event Start Date') || value('Event Date');
+    const endText = value('Event End Date');
+    const startDay = parseEventDay(startText);
+    const endDay = endText ? parseEventDay(endText) : startDay;
+    const startTextTime = value('Start Time');
+    const endTextTime = value('End Time');
+    const startTime = parseEventTime(startTextTime);
+    const endTime = parseEventTime(endTextTime);
+    const start = startDay + (startTime || 0);
+    // A date with no end time stays active until midnight at the end of that date.
+    const end = endDay + (endTextTime ? endTime : dayMs);
+    const hasDates = Number.isFinite(start) && Number.isFinite(end) && end >= start;
+    if(status === 'confirmed' && (!hasDates || (startTextTime && !Number.isFinite(startTime)))) return null;
+
+    return {
+      id: escapeHtml(id), title: escapeHtml(title), status,
+      type: escapeHtml(value('Event Type')),
+      start: Number.isFinite(start) ? start : Infinity, end,
+      date: Number.isFinite(startDay) ? eventDayLabel.format(startDay) +
+        (endDay > startDay ? ' – ' + eventDayLabel.format(endDay) : '') : 'Date to be announced',
+      time: [startTime, endTime].filter(Number.isFinite).map(time => eventTimeLabel.format(time)).join(' – '),
+      location: escapeHtml(value('Location')), desc: escapeHtml(value('Description')),
+      formUrl: safeHttpLink(value('Sign-Up Link')), recapUrl: safeHttpLink(value('Recap Link'))
+    };
+  }
+
+  function updateEventSchedule(now = easternNow()){
+    const today = Math.floor(now / dayMs) * dayMs;
+    const weekStart = today - ((new Date(today).getUTCDay() + 6) % 7) * dayMs;
+    const weekEnd = weekStart + 7 * dayMs;
+    for(const event of events){
+      if(event.status !== 'planned') event.status = event.end <= now ? 'past' : 'upcoming';
+    }
+    thisWeek = events.filter(event => event.status === 'upcoming' &&
+      event.start < weekEnd && event.end > weekStart);
+  }
+
+  function nextEvent(){
+    return events.find(event => event.status === 'upcoming');
+  }
+
+  function renderEventSchedule(){
+    updateEventSchedule();
+    renderTicker();
+    renderHome();
+    renderEvents();
+  }
+
+  function refreshEventSchedule(){
+    if(eventLoadMessage) return;
+    const previousWeek = thisWeek;
+    const previousUpcoming = events.filter(event => event.status === 'upcoming').length;
+    updateEventSchedule();
+    if(previousUpcoming !== events.filter(event => event.status === 'upcoming').length ||
+        previousWeek.length !== thisWeek.length ||
+        previousWeek.some((event, index) => event !== thisWeek[index])){
+      renderTicker();
+      renderHome();
+      renderEvents();
+    }
+  }
+
+  async function loadEvents(){
+    try {
+      const response = await fetch(eventsCsvUrl);
+      if(!response.ok) throw new Error('Events CSV request failed: ' + response.status);
+      const { data, errors, meta } = Papa.parse(await response.text(), {
+        header: true, skipEmptyLines: 'greedy', transformHeader: header => header.trim()
+      });
+      const fields = meta.fields || [];
+      if(errors.length || !['Event ID', 'Event Name', 'Status'].every(field => fields.includes(field)) ||
+          !(fields.includes('Event Start Date') || fields.includes('Event Date'))){
+        throw new Error('The published Events CSV has unexpected headers or rows.');
+      }
+      const ids = new Set();
+      for(const row of data){
+        const event = readEvent(row);
+        if(!event || ids.has(event.id)) continue;
+        ids.add(event.id);
+        events.push(event);
+      }
+      events.sort((a, b) => a.start - b.start || a.title.localeCompare(b.title));
+      eventLoadMessage = '';
+    } catch(error) {
+      console.warn('The event schedule could not load:', error);
+      eventLoadMessage = 'Events are temporarily unavailable.';
+    }
+    renderEventSchedule();
+  }
+
+  function renderTicker(){
+    const next = nextEvent();
+    const parts = thisWeek.length
+      ? thisWeek.map(event => `<span><b>${event.date}</b>${event.time ? ` <span class="t-time">· ${event.time}</span>` : ''} — ${event.title}</span>`).join('')
+      : `<span>${eventLoadMessage || (next
+          ? `No confirmed events this week · Next: <b>${next.date}</b> — ${next.title}`
+          : 'No confirmed events this week.')}</span>`;
+    document.getElementById('tickerTrack').innerHTML = parts + parts;
+  }
+
   function emptyState(msg){
     return `<div style="grid-column:1/-1; border:1px dashed var(--line); border-radius:var(--radius); padding:26px; text-align:center; color:var(--slate); font-size:13.5px; background:#FBFAF6;">${msg}</div>`;
   }
+
   function renderHome(){
-    const upcoming = events.filter(e=>e.status==='upcoming');
-    const past = events.filter(e=>e.status==='past');
-    document.getElementById('homeStats').innerHTML = `
-      <div class="stat-card reveal-up"><div class="num" data-countup="${upcoming.length}">0</div><div class="lbl">Upcoming events</div></div>
-      <div class="stat-card reveal-up" style="transition-delay:80ms;"><div class="num" data-countup="${past.length}">0</div><div class="lbl">Archived events</div></div>
+    const archived = events.filter(event => event.status === 'past').length;
+    const next = nextEvent();
+    document.getElementById('homeStats').innerHTML = eventLoadMessage ? '' : `
+      <div class="stat-card reveal-up"><div class="num" data-countup="${thisWeek.length}">0</div><div class="lbl">Events this week</div></div>
+      <div class="stat-card reveal-up" style="transition-delay:80ms;"><div class="num" data-countup="${archived}">0</div><div class="lbl">Archived events</div></div>
     `;
-    document.getElementById('homeUpcoming').innerHTML = upcoming.length
-      ? upcoming.slice(0,3).map(eventCardHTML).join('')
-      : emptyState('No confirmed upcoming events yet. Once an event is locked in, add it to the <b>events</b> list and it will show up here automatically.');
-    bindRsvpButtons();
-    bindExpandButtons();
+    document.getElementById('homeUpcoming').innerHTML = thisWeek.length
+      ? thisWeek.map(eventCardHTML).join('')
+      : emptyState(eventLoadMessage || (next
+          ? `No confirmed events this week. Next up: <b>${next.title}</b> on ${next.date}.`
+          : 'No confirmed events this week.'));
     bindReveals(document.getElementById('homeStats'));
     bindReveals(document.getElementById('homeUpcoming'));
   }
 
-  function richExtrasHTML(e){
-    let h = '';
-    if(e.panelists && e.panelists.length){
-      h += `<div class="ecard-label">Panelists</div><ul class="panelist-list">` +
-        e.panelists.map(p=>`<li><span class="p-name">${p.name}</span><span class="p-role">${p.role}</span></li>`).join('') + `</ul>`;
-    }
-    if(e.topics && e.topics.length){
-      h += `<div class="ecard-label">What we’ll discuss</div><ul class="topic-chips">` +
-        e.topics.map(t=>`<li>${t}</li>`).join('') + `</ul>`;
-    }
-    return h;
-  }
-
-  /* ================= EVENT CARD ================= */
-  function eventCardHTML(e, i){
-    const delay = `style="transition-delay:${Math.min((i||0)*70,280)}ms;"`;
-    if(e.status==='upcoming'){
-      const going = e._going;
-      return `
-      <div class="event-card ${e.panelists?'wide ':''}reveal-up" ${delay}>
+  function eventCardHTML(event, index){
+    const past = event.status === 'past';
+    const planned = event.status === 'planned';
+    const action = past
+      ? event.recapUrl && `<a class="btn ghost small" href="${event.recapUrl}" target="_blank" rel="noopener">View recap ↗</a>`
+      : event.formUrl
+        ? `<a class="btn" href="${event.formUrl}" target="_blank" rel="noopener">Sign up ↗</a>`
+        : '';
+    return `
+      <div class="event-card ${past ? 'past ' : ''}reveal-up" style="transition-delay:${Math.min(index * 70, 280)}ms;">
         <div class="tag-strip"></div>
         <div class="ecard-body">
-          <div class="ecard-type">${e.type}</div>
-          <div class="ecard-title">${e.title}</div>
-          ${e.subtitle ? `<div class="ecard-sub">${e.subtitle}</div>` : ''}
+          <div class="ecard-type">${[event.type, past ? 'Past' : planned ? 'Planned' : ''].filter(Boolean).join(' · ')}</div>
+          <div class="ecard-title">${event.title}</div>
           <div class="ecard-meta">
-            ${e.speaker ? `<div>🎙️ ${e.speaker}${e.role? ' · '+e.role:''}</div>` : ''}
-            <div>📅 <span class="dt-badge">${e.date}</span>${e.time? ` <span class="dt-badge time">${e.time}</span>`:''}</div>
-            ${e.location ? `<div>📍 ${e.location}</div>` : ''}
-            ${e.format ? `<div>🎟️ ${e.format}</div>` : ''}
-            ${e.speakerLink ? `<div>🔗 <a href="${e.speakerLink}" target="_blank" rel="noopener" style="color:var(--slate);">Speaker LinkedIn ↗</a></div>` : ''}
+            <div>📅 <span class="dt-badge">${event.date}</span>${event.time ? ` <span class="dt-badge time">${event.time} ET</span>` : ''}</div>
+            ${event.location ? `<div>📍 ${event.location}</div>` : ''}
           </div>
-          ${e.desc ? `<div class="ecard-desc">${e.desc}</div>` : ''}
-          ${richExtrasHTML(e)}
-          <div class="ecard-foot" style="justify-content:flex-end;">
-            ${e.formUrl
-              ? `<a class="btn" href="${e.formUrl}" target="_blank" rel="noopener">Sign up ↗</a>`
-              : `<button class="btn ${going?'going':''}" data-rsvp="${e.id}">${going? '✓ Going':'RSVP'}</button>`}
-          </div>
+          ${event.desc ? `<div class="ecard-desc event-description">${event.desc}</div>` : ''}
+          ${action ? `<div class="ecard-foot" style="justify-content:flex-end;">${action}</div>` : ''}
         </div>
       </div>`;
-    } else {
-      const open = e._open;
-      const hasRecap = !!e.hasRecap;
-      return `
-      <div class="event-card past ${e.panelists?'wide ':''}reveal-up" ${delay}>
-        <div class="tag-strip"></div>
-        <div class="ecard-body">
-          <div class="ecard-type">${e.type} · Past</div>
-          <div class="ecard-title">${e.title}</div>
-          ${e.subtitle ? `<div class="ecard-sub">${e.subtitle}</div>` : ''}
-          <div class="ecard-meta">
-            ${e.speaker ? `<div>🎙️ ${e.speaker}${e.role? ' · '+e.role:''}</div>` : ''}
-            <div>📅 <span class="dt-badge">${e.date}</span>${e.time? ` <span class="dt-badge time">${e.time}</span>`:''}</div>
-            ${e.location ? `<div>📍 ${e.location}</div>` : ''}
-            ${e.format ? `<div>🎟️ ${e.format}</div>` : ''}
-          </div>
-          ${e.desc ? `<div class="ecard-desc">${e.desc}</div>` : ''}
-          ${richExtrasHTML(e)}
-          ${(open && hasRecap) ? `
-            <div style="margin-bottom:12px;">
-              <div style="font-family:var(--font-mono); font-size:10.5px; letter-spacing:.06em; text-transform:uppercase; color:var(--slate); margin-bottom:6px;">Key Takeaways</div>
-              <ul style="margin:0;padding-left:18px;font-size:13px;line-height:1.8;color:#4a4340;">
-                ${e.takeaways.map(t=>`<li>${t}</li>`).join('')}
-              </ul>
-            </div>` : ''}
-          ${(e.hasRecording || e.hasSlides || hasRecap) ? `
-          <div class="ecard-foot">
-            <span class="rsvp-count">${e.hasRecording?'🎥 Recording':''} ${e.hasSlides? '📑 Slides':''}</span>
-            ${hasRecap ? `<button class="btn ghost small" data-expand="${e.id}">${open? 'Hide recap':'View recap'}</button>` : ''}
-          </div>` : ''}
-        </div>
-      </div>`;
-    }
-  }
-
-  function bindRsvpButtons(){
-    document.querySelectorAll('[data-rsvp]').forEach(btn=>{
-      btn.onclick = ()=>{
-        const id = btn.getAttribute('data-rsvp');
-        const ev = events.find(x=>x.id===id);
-        ev._going = !ev._going;
-        renderHome(); renderEvents();
-      };
-    });
-  }
-  function bindExpandButtons(){
-    document.querySelectorAll('[data-expand]').forEach(btn=>{
-      btn.onclick = ()=>{
-        const id = btn.getAttribute('data-expand');
-        const ev = events.find(x=>x.id===id);
-        ev._open = !ev._open;
-        renderHome(); renderEvents();
-      };
-    });
   }
 
   /* ================= EVENTS PAGE ================= */
   let evFilter = 'upcoming';
   function renderEvents(){
-    const list = events.filter(e=>e.status===evFilter);
+    const list = events.filter(event => event.status === evFilter);
+    if(evFilter === 'past') list.sort((a, b) => b.end - a.end);
+    const emptyMessages = {
+      upcoming: 'No confirmed upcoming events yet.',
+      planned: 'No planned events yet.',
+      past: 'No past events archived yet.'
+    };
     document.getElementById('eventsGrid').innerHTML = list.length
       ? list.map(eventCardHTML).join('')
-      : emptyState(evFilter==='upcoming'
-          ? 'No confirmed upcoming events yet.'
-          : 'No past events archived yet.');
-    bindRsvpButtons(); bindExpandButtons();
+      : emptyState(eventLoadMessage || emptyMessages[evFilter]);
     bindReveals(document.getElementById('eventsGrid'));
   }
   document.querySelectorAll('[data-evfilter]').forEach(btn=>{
@@ -1433,14 +1384,48 @@
   }
 
   /* ================= RESOURCES ================= */
-  function renderResources(){
-    document.getElementById('resGrid').innerHTML = resources.map((r,i)=>`
+  async function loadResources(){
+    const grid = document.getElementById('resGrid');
+    grid.innerHTML = emptyState('Loading resources…');
+    try {
+      const response = await fetch(resourcesCsvUrl);
+      if(!response.ok) throw new Error('Resources CSV request failed: ' + response.status);
+      const { data, errors, meta } = Papa.parse(await response.text(), {
+        header: true, skipEmptyLines: 'greedy', transformHeader: header => header.trim()
+      });
+      const fields = ['Resource Type', 'Resource Name', 'What To Use For', 'Resource Link'];
+      if(errors.length || !fields.every(field => meta.fields?.includes(field))){
+        throw new Error('The published Resources CSV has unexpected headers or rows.');
+      }
+
+      const resources = [];
+      for(const row of data){
+        const label = row['Resource Name'].trim();
+        if(!label) continue;
+        resources.push({
+          type: escapeHtml(row['Resource Type'].trim() || 'Other'),
+          label: escapeHtml(label),
+          description: escapeHtml(row['What To Use For'].trim()),
+          url: safeHttpLink(row['Resource Link'].trim())
+        });
+      }
+      renderResources(grid, resources);
+    } catch(error) {
+      console.warn('The resource library could not load:', error);
+      grid.innerHTML = emptyState('Resources are temporarily unavailable.');
+    }
+  }
+
+  function renderResources(grid, resources){
+    const icons = new Map([['career', '💼'], ['networking', '🤝'], ['research', '🔍']]);
+    grid.innerHTML = resources.length ? resources.map((item,i)=>`
       <div class="res-card reveal-up" style="transition-delay:${Math.min(i*70,280)}ms;">
-        <h4>${r.icon} ${r.title}</h4>
-        <ul>${r.items.map(it=>`<li><a href="${it.url}" target="_blank" rel="noopener">${it.label} ↗</a></li>`).join('')}</ul>
+        <span class="pill">${icons.has(item.type.toLowerCase()) ? `<span aria-hidden="true">${icons.get(item.type.toLowerCase())}</span> ` : ''}${item.type}</span>
+        <h4>${item.url ? `<a href="${item.url}" target="_blank" rel="noopener">${item.label} ↗</a>` : item.label}</h4>
+        ${item.description ? `<p class="res-description">${item.description}</p>` : ''}
       </div>
-    `).join('');
-    bindReveals(document.getElementById('resGrid'));
+    `).join('') : emptyState('No resources have been added yet.');
+    bindReveals(grid);
   }
 
   /* ================= POLLS ================= */
@@ -1526,6 +1511,7 @@
 
   /* ================= NAV ================= */
   function goToPage(page){
+    if(page === 'home' || page === 'events') refreshEventSchedule();
     document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.getAttribute('data-page')===page));
     document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
     document.getElementById('page-'+page).classList.add('active');
@@ -1537,14 +1523,14 @@
   document.getElementById('topVoiceBtn').onclick = ()=> goToPage('voice');
 
   /* ================= INIT ================= */
-  renderTicker();
-  renderHome();
-  renderEvents();
+  renderEventSchedule();
+  loadEvents();
+  setInterval(refreshEventSchedule, 30000);
   renderNewsletter();
   renderSpeakers();
   loadLeaderboard();
   renderCareer();
-  renderResources();
+  loadResources();
   renderPolls();
 
 })();
